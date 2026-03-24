@@ -26,8 +26,26 @@ from algorithms import get_full_route_edges
 # ---------------------------------------------------------------------------
 
 def _get_thai_font() -> str:
-    preferred = ["Leelawadee UI", "Leelawadee", "Tahoma", "Arial Unicode MS"]
+    preferred = [
+        # Windows
+        "Leelawadee UI", "Leelawadee", "Tahoma", "Arial Unicode MS",
+        # Linux — fonts-thai-tlwg (Streamlit Cloud / Ubuntu)
+        "Waree", "Garuda", "Norasi", "Laksaman", "Umpush", "Kinnari",
+        # Linux — fonts-noto (if installed)
+        "Noto Sans Thai",
+    ]
     available = {f.name for f in fm.fontManager.ttflist}
+
+    # ถ้ายังไม่พบฟอนต์ไทยเลย ลอง rebuild font cache
+    # (Streamlit Cloud: fonts ถูกติดตั้งจาก packages.txt ก่อน process เริ่ม
+    #  แต่ matplotlib cache อาจยังไม่รู้จัก)
+    if not any(f in available for f in preferred):
+        try:
+            fm.fontManager = fm.FontManager()
+            available = {f.name for f in fm.fontManager.ttflist}
+        except Exception:
+            pass
+
     for font in preferred:
         if font in available:
             return font
